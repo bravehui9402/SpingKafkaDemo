@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd">
+        <!--<context:component-scan base-package="producer" />-->
+        <bean id="producerProperties" class="java.util.HashMap">
+            <constructor-arg>
+                <map>
+                    <!--broker集群地址-->
+                    <entry key="bootstrap.servers" value="192.168.35.10:9092,192.168.35.11:9092,192.168.35.12:9092"/>
+                    <!--acks 参数配置-->
+                    <entry key="acks" value="all"/>
+                    <!--发送失败重试次数-->
+                    <entry key ="retries" value="3"/>
+                    <!--批次发送大小的内存阀值-->
+                    <entry key="batch.size" value="16384"/>
+                    <!--批处理延迟时间上限-->
+                    <entry key="linger.ms" value="1"/>
+                    <!--开启幂等性-->
+                    <entry key="enable.idempotence" value="true"/>
+                    <!--批处理缓冲区-->
+                    <entry key="buffer.memory" value="33554432"/>
+                    <!--key序列化器-->
+                    <entry key="key.serializer" value="org.apache.kafka.common.serialization.StringSerializer"/>
+                    <!--value序列化器-->
+                    <entry key="value.serializer" value="org.apache.kafka.common.serialization.StringSerializer"/>
+                </map>
+            </constructor-arg>
+        </bean>
+        <!--配置一个生产者监听器，在该类写发送成功或失败的回调方法-->
+       <!-- <bean id="producerLisener" class="producer.KafkaSendResultHandler"></bean>-->
+        <!--springkafka提供的发送类，对kafka发送方法进行加强性的封装-->
+        <bean id="kafkaTemplate" class="org.springframework.kafka.core.KafkaTemplate">
+            <constructor-arg ref="producerFactory"/>
+            <constructor-arg name="autoFlush" value="true"/>
+            <property name="defaultTopic" value="myTopic"/>
+            <!--<property name="producerListener" ref="producerLisener"></property>-->
+        </bean>
+        <!--producer工厂-->
+        <bean id="producerFactory" class="org.springframework.kafka.core.DefaultKafkaProducerFactory">
+            <constructor-arg>
+                <ref bean="producerProperties"/>
+            </constructor-arg>
+        </bean>
+</beans>
